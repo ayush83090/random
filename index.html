@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubu & Puchki's Spicy Game</title>
+    <style>
+        :root {
+            --primary: #ff2d75;
+            --secondary: #ff6b9e;
+            --dark: #1a1a2e;
+            --darker: #16213e;
+            --text: #f8f8f8;
+            --love-light: #ff9ebb;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+        
+        /* 3D Floating Hearts Background */
+        .hearts-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .floating-heart {
+            position: absolute;
+            opacity: 0.6;
+            animation: float 15s linear infinite;
+            filter: drop-shadow(0 0 5px var(--primary));
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        nav {
+            background-color: rgba(22, 33, 62, 0.8);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(255, 45, 117, 0.5);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            position: relative;
+            padding: 0.5rem 0;
+        }
+        
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: width 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        
+        .container {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .game-container {
+            background-color: rgba(22, 33, 62, 0.8);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            margin-top: 1rem;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 45, 117, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .game-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 45, 117, 0.1) 0%, transparent 70%);
+            animation: pulse-glow 8s infinite alternate;
+            z-index: -1;
+        }
+        
+        @keyframes pulse-glow {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.2;
+            }
+            100% {
+                transform: scale(1.2);
+                opacity: 0.4;
+            }
+        }
+        
+        h1 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px rgba(255, 45, 117, 0.3);
+            position: relative;
+            display: inline-block;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        }
+        
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .mode-btn {
+            background-color: var(--dark);
+            color: var(--text);
+            border: 2px solid var(--primary);
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .mode-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 45, 117, 0.3), transparent);
+            transition: all 0.5s;
+            z-index: -1;
+        }
+        
+        .mode-btn:hover::before {
+            left: 100%;
+        }
+        
+        .mode-btn.active {
+            background-color: var(--primary);
+            color: var(--dark);
+            font-weight: bold;
+            box-shadow: 0 0 15px var(--primary);
+        }
+        
+        .mode-btn:hover {
+            background-color: var(--secondary);
+            color: var(--dark);
+        }
+        
+        .display-area {
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 2rem 0;
+            padding: 2rem;
+            background-color: rgba(26, 26, 46, 0.5);
+            border-radius: 10px;
+            border: 1px dashed var(--secondary);
+            font-size: 1.3rem;
+            line-height: 1.6;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .display-area:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(255, 45, 117, 0.3);
+        }
+        
+        .display-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 45, 117, 0.05), transparent);
+            pointer-events: none;
+        }
+        
+        .spin-btn {
+            background-color: var(--primary);
+            color: var(--dark);
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            margin-top: 1rem;
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2), 0 0 15px var(--primary);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .spin-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: translateX(-100%);
+            transition: all 0.5s;
+            z-index: -1;
+        }
+        
+        .spin-btn:hover {
+            background-color: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.2), 0 0 20px var(--primary);
+        }
+        
+        .spin-btn:hover::before {
+            transform: translateX(100%);
+        }
+        
+        .spin-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2), 0 0 10px var(--primary);
+        }
+        
+        .heart {
+            color: var(--primary);
+            font-size: 1.5rem;
+            animation: pulse 1.5s infinite;
+            display: inline-block;
+            text-shadow: 0 0 10px var(--primary);
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .about-content {
+            text-align: center;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: rgba(22, 33, 62, 0.8);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 45, 117, 0.2);
+            position: relative;
+        }
+        
+        .about-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path fill="%23ff2d75" opacity="0.05" d="M50,30 C60,20 70,20 80,30 C90,40 90,50 80,60 C70,70 60,70 50,60 C40,70 30,70 20,60 C10,50 10,40 20,30 C30,20 40,20 50,30 Z"/></svg>');
+            background-size: 100px 100px;
+            opacity: 0.2;
+            pointer-events: none;
+        }
+        
+        .about-content p {
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .highlight {
+            color: var(--primary);
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 45, 117, 0.5);
+            font-size: 1.3rem;
+        }
+        
+        /* Love message floating animation */
+        .love-message {
+            position: fixed;
+            color: var(--love-light);
+            font-size: 1rem;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 100;
+            text-shadow: 0 0 5px var(--primary);
+            animation: float-message 8s linear forwards;
+        }
+        
+        @keyframes float-message {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(10deg);
+                opacity: 0;
+            }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .nav-links {
+                gap: 1rem;
+            }
+            
+            .mode-selector {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .display-area {
+                padding: 1.5rem;
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 3D Floating Hearts Background -->
+    <div class="hearts-container" id="hearts-container"></div>
+    
+    <nav>
+        <div class="logo">
+            Bubu <span class="heart" id="heart">♥</span> Puchki
+        </div>
+        <div class="nav-links">
+            <a href="#" id="home-link">Home</a>
+            <a href="#" id="about-link">About</a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div id="home-page">
+            <h1>Spicy Truth or Dare</h1>
+            
+            <div class="game-container">
+                <div class="mode-selector">
+                    <button class="mode-btn active" id="truth-btn">Truth</button>
+                    <button class="mode-btn" id="dare-btn">Dare</button>
+                </div>
+                
+                <div class="display-area" id="question-display">
+                    Click the spin button to get a question!
+                </div>
+                
+                <button class="spin-btn" id="spin-btn">SPIN</button>
+            </div>
+        </div>
+        
+        <div id="about-page" class="hidden">
+            <h1>About Bubu & Puchki</h1>
+            
+            <div class="about-content">
+                <p>Bubu loves Puchki more than words can express <span class="heart">♥</span></p>
+                <p>Every moment apart feels like an eternity, but this game brings us closer even when we're miles away.</p>
+                <p>Bubu thinks about Puchki every second of every day, dreaming of the next time they can be together.</p>
+                <p>No distance can diminish the fire that burns between us. Our connection is unbreakable, our passion unstoppable.</p>
+                <p class="highlight">Bubu will always be Puchki's, and Puchki will always be Bubu's. Forever.</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Create floating 3D hearts background
+        const heartsContainer = document.getElementById('hearts-container');
+        const heartEmojis = ['♥', '❤️', '💕', '💖', '💗', '💘', '💝'];
+        
+        function createFloatingHearts() {
+            const heart = document.createElement('div');
+            heart.className = 'floating-heart';
+            heart.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+            
+            // Random properties
+            const size = Math.random() * 30 + 10;
+            const duration = Math.random() * 15 + 10;
+            const delay = Math.random() * 5;
+            const left = Math.random() * 100;
+            
+            heart.style.fontSize = `${size}px`;
+            heart.style.left = `${left}%`;
+            heart.style.animationDuration = `${duration}s`;
+            heart.style.animationDelay = `${delay}s`;
+            
+            heartsContainer.appendChild(heart);
+            
+            // Remove heart after animation completes
+            setTimeout(() => {
+                heart.remove();
+            }, duration * 1000);
+        }
+        
+        // Create initial hearts
+        for (let i = 0; i < 15; i++) {
+            createFloatingHearts();
+        }
+        
+        // Keep creating hearts periodically
+        setInterval(createFloatingHearts, 1000);
+        
+        // Create occasional love messages
+        const loveMessages = [
+            "Bubu loves Puchki",
+            "Forever yours",
+            "My heart beats for you",
+            "Distance can't stop us",
+            "You're my everything",
+            "I miss you",
+            "Thinking of you",
+            "My soulmate",
+            "Can't wait to hold you",
+            "You complete me"
+        ];
+        
+        function createLoveMessage() {
+            const message = document.createElement('div');
+            message.className = 'love-message';
+            message.textContent = loveMessages[Math.floor(Math.random() * loveMessages.length)];
+            
+            // Random properties
+            const left = Math.random() * 80 + 10;
+            const delay = Math.random() * 5;
+            const duration = Math.random() * 5 + 5;
+            
+            message.style.left = `${left}%`;
+            message.style.top = `${window.innerHeight}px`;
+            message.style.animationDuration = `${duration}s`;
+            message.style.animationDelay = `${delay}s`;
+            
+            document.body.appendChild(message);
+            
+            // Remove message after animation completes
+            setTimeout(() => {
+                message.remove();
+            }, (duration + delay) * 1000);
+        }
+        
+        // Create love messages periodically
+        setInterval(createLoveMessage, 3000);
+        
+        // Navigation
+        const homeLink = document.getElementById('home-link');
+        const aboutLink = document.getElementById('about-link');
+        const homePage = document.getElementById('home-page');
+        const aboutPage = document.getElementById('about-page');
+        const heart = document.getElementById('heart');
+        
+        homeLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            homePage.classList.remove('hidden');
+            aboutPage.classList.add('hidden');
+            createLoveMessage();
+        });
+        
+        aboutLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            homePage.classList.add('hidden');
+            aboutPage.classList.remove('hidden');
+            createLoveMessage();
+        });
+        
+        // Heart animation
+        setInterval(() => {
+            heart.style.animation = 'none';
+            void heart.offsetWidth; // Trigger reflow
+            heart.style.animation = 'pulse 1.5s infinite';
+        }, 5000);
+        
+        // Game logic
+        const truthBtn = document.getElementById('truth-btn');
+        const dareBtn = document.getElementById('dare-btn');
+        const spinBtn = document.getElementById('spin-btn');
+        const questionDisplay = document.getElementById('question-display');
+        
+        let currentMode = 'truth';
+        
+        // Questions
+        const truthQuestions = [
+            "What's the wildest fantasy you've had about me?",
+            "Have you ever touched yourself while thinking about me?",
+            "What's the most embarrassing place you've gotten turned on?",
+            "What's your favorite memory of us being intimate?",
+            "Have you ever fantasized about someone else while we were together?",
+            "What's the kinkiest thing you want to try with me?",
+            "What's your biggest turn-on that you haven't told me about?",
+            "Have you ever sent nudes to someone else while we've been together?",
+            "What's the most inappropriate time you've gotten horny?",
+            "Do you prefer being dominant or submissive in bed?",
+            "What's the most adventurous place you've had sex or masturbated?",
+            "Have you ever had a sexy dream about me? What happened in it?",
+            "What's your favorite part of my body and why?",
+            "Have you ever faked an orgasm with me?",
+            "What's something you're too shy to ask me to do in bed?",
+            "How often do you masturbate thinking about me?",
+            "What's the most embarrassing thing that's happened to you during sex?",
+            "Have you ever recorded us without me knowing?",
+            "What's your secret sexual talent?",
+            "If we could have sex anywhere right now, where would you choose?",
+            "Have you ever been caught masturbating?",
+            "What's the longest you've gone without orgasming?",
+            "Do you prefer making love or rough sex?",
+            "What's your favorite position and why?",
+            "Have you ever had a threesome fantasy? Who would be the third person?",
+            "What's the most unusual place you've had sex?",
+            "Have you ever used sex toys? Which ones?",
+            "What's your biggest sexual regret?",
+            "What's something you'd never do in bed?",
+            "Have you ever had sex in public? Where?",
+            "What's your favorite type of foreplay?",
+            "Have you ever been attracted to one of my friends?",
+            "What's the most romantic thing you've imagined doing with me?",
+            "Have you ever watched porn that reminded you of us?",
+            "What's your favorite outfit you've seen me in?",
+            "Have you ever had a crush on a teacher or boss?",
+            "What's your favorite dirty name to be called?",
+            "Have you ever had an orgasm just from kissing?",
+            "What's the sexiest thing I've ever said to you?",
+            "Have you ever been turned on by someone you shouldn't be?",
+            "What's your favorite time of day for sex?",
+            "Have you ever role-played in your mind? What scenario?",
+            "What's your biggest sexual insecurity?",
+            "Have you ever been caught having sex?",
+            "What's the most spontaneous sexual thing you've done?",
+            "Have you ever been jealous of my past partners?",
+            "What's something you'd like me to do more in bed?",
+            "Have you ever had phone sex before me?",
+            "What's the most romantic thing you want to do for me?",
+            "If we could try any fantasy tonight, what would you choose?"
+        ];
+        
+        const dareQuestions = [
+            "Send a nude selfie with only a sheet covering you, captioned with something flirty.",
+            "Record a 15-second video of you doing a slow, seductive dance in your favorite underwear.",
+            "Take a steamy shower on video call and let me watch (keep it playful and safe).",
+            "Send a nude photo using creative lighting to create a silhouette effect.",
+            "Do a 20-second striptease on video call, ending with a wink.",
+            "Send a photo of you in bed, wearing nothing but a playful smile.",
+            "Record yourself whispering three naughty things you want to do with me.",
+            "Pose nude with a scarf or towel for a flirty photo and send it.",
+            "Send a close-up photo of your lips biting a strawberry seductively.",
+            "Do a slow-motion hair flip on video call while wearing something revealing.",
+            "Send a nude photo with only your hands strategically placed.",
+            "Record a flirty voice message describing how you'd tease me if I were there.",
+            "Send a photo of you wrapped in a blanket with a naughty caption.",
+            "Do a playful twirl on video call in your sexiest lingerie.",
+            "Send a nude photo with rose petals arranged creatively for cover.",
+            "Record a 10-second video of you moaning my name softly.",
+            "Send a photo of you in a bubble bath, captioned with a spicy note.",
+            "Do a flirty catwalk on video call wearing something barely-there.",
+            "Send a nude photo with a heart-shaped prop or shadow.",
+            "Record yourself reading a spicy love poem dedicated to me.",
+            "Send a photo of you in a steamy mirror selfie (keep it tasteful).",
+            "Do a flirty eye contact challenge on call for 15 seconds, no breaking!",
+            "Send a nude photo with a playful filter that adds a romantic vibe.",
+            "Record a spicy 'good night' message while lying in bed.",
+            "Send a photo of you in a towel, fresh from the shower, with a smirk.",
+            "Do a 30-second sensual dance on video call with dim lighting.",
+            "Send a nude photo using jewelry as your only cover.",
+            "Record yourself singing a flirty song snippet that reminds you of us.",
+            "Send a photo of you posing seductively with a candlelit background.",
+            "Do a spicy lip-sync to a romantic song on video call.",
+            "Send a nude photo with a scarf draped artistically over you.",
+            "Record a flirty 'I miss you' video while wearing something revealing.",
+            "Send a photo of you in lingerie with a handwritten naughty note.",
+            "Do a playful stretch on video call in a barely-there outfit.",
+            "Send a nude photo with a playful prop like a feather or ribbon.",
+            "Record yourself describing a spicy date night we'd have together.",
+            "Send a photo of you in a steamy pose with soft lighting.",
+            "Do a flirty wink and blow a kiss on video call while undressing slowly.",
+            "Send a nude photo with a flower tucked behind your ear.",
+            "Record a 10-second video of you teasing me with a flirty gesture.",
+            "Send a photo of you in a bathrobe, slightly open, with a coy smile.",
+            "Do a slow, seductive walk toward the camera on video call.",
+            "Send a nude photo with a playful shadow pattern across you.",
+            "Record a spicy 'good morning' message in nothing but a sheet.",
+            "Send a photo of you posing with a glass of wine, barely covered.",
+            "Do a flirty hair toss and giggle on video call in something spicy.",
+            "Send a nude photo with a soft blanket draped over you.",
+            "Record yourself acting out a spicy fantasy scene for me.",
+            "Send a photo of you in a dimly lit room with a sultry expression.",
+            "Do a playful, teasing pose on video call and whisper something naughty."
+        ];
+        
+        truthBtn.addEventListener('click', () => {
+            currentMode = 'truth';
+            truthBtn.classList.add('active');
+            dareBtn.classList.remove('active');
+            createLoveMessage();
+        });
+        
+        dareBtn.addEventListener('click', () => {
+            currentMode = 'dare';
+            dareBtn.classList.add('active');
+            truthBtn.classList.remove('active');
+            createLoveMessage();
+        });
+        
+        spinBtn.addEventListener('click', () => {
+            spinBtn.disabled = true;
+            spinBtn.textContent = 'Spinning...';
+            
+            // Create heart explosion effect
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => {
+                    createFloatingHearts();
+                }, i * 100);
+            }
+            
+            // Animation effect
+            let counter = 0;
+            const interval = setInterval(() => {
+                if (currentMode === 'truth') {
+                    const randomIndex = Math.floor(Math.random() * truthQuestions.length);
+                    questionDisplay.textContent = truthQuestions[randomIndex];
+                } else {
+                    const randomIndex = Math.floor(Math.random() * dareQuestions.length);
+                    questionDisplay.textContent = dareQuestions[randomIndex];
+                }
+                
+                counter++;
+                if (counter > 10) {
+                    clearInterval(interval);
+                    spinBtn.disabled = false;
+                    spinBtn.textContent = 'SPIN';
+                    
+                    // Create floating love message
+                    createLoveMessage();
+                }
+            }, 100);
+        });
+        
+        // Initial love message
+        setTimeout(createLoveMessage, 1000);
+    </script>
+</body>
+</html>
